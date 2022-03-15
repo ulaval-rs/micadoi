@@ -35,7 +35,25 @@ poetry run python micadoi/ extract \
 You can inspect the resulting json. The tool extracts the dataset metadata, its related study and variables.
 
 ### Create a new DOI using a mica metadata json file
-With the `generate-mica-doi` command, we generate a new DOI using the mica metadata json file.
+With the `generate-mica-doi` command, we generate a new DOI using the mica metadata json file. One special value of a DOI's metadata is the Creators attribute, which is a list of creators with their name, affiliation and identifiers (e.g. ORCID). Create à creators.json file containing the following:
+```json
+{
+    {
+    "name": "Me",
+    "affiliation": [
+        "ulaval"
+        // can be an empty list instead
+    ],
+    "nameIdentifiers": [
+        "my-orcid"
+        // can be an empty list instead
+    ]
+}
+}
+
+```
+
+Now execute the following command, specifying our creator.json file with the --creator-path flag.
 
 ```sh
 # create a new DOI based on an extracted mica dataset
