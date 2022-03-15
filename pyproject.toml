@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "mica-extractor"
+name = "micadoi"
 version = "0.1.0"
 description = ""
 authors = ["olichose123 <oli.banville@gmail.com>"]
@@ -8,6 +8,7 @@ authors = ["olichose123 <oli.banville@gmail.com>"]
 python = "^3.10"
 requests = "^2.27.1"
 jsonmodels = "^2.5.0"
+click = "^8.0.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
