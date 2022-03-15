@@ -36,9 +36,9 @@ You can inspect the resulting json. The tool extracts the dataset metadata, its 
 
 ### Create a new DOI using a mica metadata json file
 With the `generate-mica-doi` command, we generate a new DOI using the mica metadata json file. One special value of a DOI's metadata is the Creators attribute, which is a list of creators with their name, affiliation and identifiers (e.g. ORCID). Create à creators.json file containing the following:
-```json
+```jsonc
+// creators.json
 {
-    {
     "name": "Me",
     "affiliation": [
         "ulaval"
@@ -49,7 +49,7 @@ With the `generate-mica-doi` command, we generate a new DOI using the mica metad
         // can be an empty list instead
     ]
 }
-}
+
 
 ```
 
@@ -87,7 +87,8 @@ Here we download the json output of the `10.82134/zrry-fb53` DOI and pipe it int
 As you might have seen by inspecting the output of the get-doi command, a doi has a specific structure where most of its data is found in an `attributes` object. Updates to a DOI's information is done by modifying this object. The 'update-doi' command will update the doi's attributes with a specified attributes json file.
 
 Start by creating a `attributes.json` file as a single json object (which represents the attributes to update), then add elements to update as necessary. Refer to the DataCite API documentation for the list of attributes. Here is an example where we update the title of the DOI. By default the title of cag-baseline DOI generated through this tool will be `CaG-Baseline`:
-```json
+```jsonc
+// attributes.json
 {
     "titles": [
         {
