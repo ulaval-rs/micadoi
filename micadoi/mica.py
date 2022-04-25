@@ -149,7 +149,7 @@ def get_dataset(name: str, auth: MicaAuth):
         headers=headers,
     )
     if response.status_code != 200:
-        raise Exception(f"Error: {response.status_code}")
+        raise Exception(f"Error in get_dataset: {response.status_code}. {name}")
     return response.json()
 
 
@@ -168,7 +168,7 @@ def get_study(name: str, auth: MicaAuth):
         headers=headers,
     )
     if response.status_code != 200:
-        raise Exception(f"Error: {response.status_code}")
+        raise Exception(f"Error in get_study: {response.status_code}. {name}")
     return response.json()
 
 
@@ -187,7 +187,9 @@ def get_variables(dataset_id: str, limit: int, locale: str, auth: MicaAuth):
         headers=headers,
     )
     if response.status_code != 200:
-        raise Exception(f"Error: {response.status_code}")
+        raise Exception(
+            f"Error in get_variables: {response.status_code}. {dataset_id}, {limit}, {locale}"
+        )
     return response.json()
 
 
@@ -229,8 +231,8 @@ def extract(mica_host, mica_user, mica_password, dataset_id):
                 "id": variable["id"],
                 "name": variable["name"],
                 "variableType": variable["variableType"],
-                "variableLabel": variable["variableLabel"],
-                "annotations": variable["annotations"],
+                # "variableLabel": variable["variableLabel"],
+                # "annotations": variable["annotations"],
                 "valueType": variable["valueType"],
                 "categories": variable.get("categories", []),
             }
