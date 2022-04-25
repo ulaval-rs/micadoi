@@ -2,6 +2,7 @@ from datetime import datetime
 import requests
 import click
 import json
+import models
 
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 DATASET_ENDPOINT = "/ws/draft/collected-dataset/{}/"
@@ -150,7 +151,7 @@ def get_dataset(name: str, auth: MicaAuth):
     )
     if response.status_code != 200:
         raise Exception(f"Error in get_dataset: {response.status_code}. {name}")
-    return response.json()
+    return models.MicaDatasetModel.parse_obj(response.json())
 
 
 def get_study(name: str, auth: MicaAuth):
@@ -169,28 +170,7 @@ def get_study(name: str, auth: MicaAuth):
     )
     if response.status_code != 200:
         raise Exception(f"Error in get_study: {response.status_code}. {name}")
-    return response.json()
-
-
-def get_variables(dataset_id: str, limit: int, locale: str, auth: MicaAuth):
-    """
-    Uses the mica rest API's rql system to select all variables related to a specific dataset
-    returns a requests.Response object on 200, raise an exception otherwise
-    """
-
-    path = f"{auth.url}/ws/variables/_rql?query=dataset(in(Mica_dataset.id,{dataset_id})),variable(limit(0,{limit}),fields(attributes.label.*,attributes.description.*,variableType,valueType,categories.*,unit,attributes.Mlstr_area*),sort(index,name)),locale({locale})"  # noaq: E501
-
-    headers = {"Accept": "application/json, */*"}
-    response = requests.get(
-        path,
-        auth=requests.auth.HTTPBasicAuth(auth.username, auth.password),
-        headers=headers,
-    )
-    if response.status_code != 200:
-        raise Exception(
-            f"Error in get_variables: {response.status_code}. {dataset_id}, {limit}, {locale}"
-        )
-    return response.json()
+    return models.MicaStudyModel.parse_obj(response.json())
 
 
 @click.command()
@@ -210,62 +190,27 @@ def extract(mica_host, mica_user, mica_password, dataset_id):
     auth = MicaAuth(mica_host, mica_user, mica_password)
 
     # download dataset metadata
-    dataset = MicaDataset(get_dataset(dataset_id, auth))
-
-    # determine number of variables
-    variable_count = get_variables(dataset_id, 1, "en", auth)["variableResultDto"][
-        "totalHits"
-    ]
-
-    # download all variables related to dataset
-    variables = get_variables(dataset_id, variable_count, "en", auth)[
-        "variableResultDto"
-    ]["obiba.mica.DatasetVariableResultDto.result"]["summaries"]
-
-    # remove repetitive data from variables
-    # (they each have the study and dataset name, among other things)
-    cleaned_variables = []
-    for variable in variables:
-        cleaned_variables.append(
-            {
-                "id": variable["id"],
-                "name": variable["name"],
-                "variableType": variable["variableType"],
-                # "variableLabel": variable["variableLabel"],
-                # "annotations": variable["annotations"],
-                "valueType": variable["valueType"],
-                "categories": variable.get("categories", []),
-            }
-        )
+    # dataset = MicaDataset(get_dataset(dataset_id, auth))
+    dataset = get_dataset(dataset_id, auth)
 
     # get the study id
-    study_id = dataset.studyId
-
+    study_id = dataset.obiba_mica_CollectedDatasetDto_type.studyTable.studyId
     # get the study
-    study = MicaStudy(get_study(study_id, auth))
+    # study = MicaStudy(get_study(study_id, auth))
+    study = get_study(study_id, auth)
 
-    click.echo(
-        json.dumps(
-            {
-                "metadata": {
-                    "url": f"{auth.url}/dataset/{dataset_id}",
-                },
-                "dataset": dataset.data,
-                "study": study.data,
-                "variables": cleaned_variables,
-            },
-            indent=2,
-        )
+    # convert content json to actual unescaped json
+    dataset.content = json.loads(dataset.content)
+    study.content = json.loads(study.content)
+    for population in study.populations:
+        population.content = json.loads(population.content)
+        for data_collection_event in population.dataCollectionEvents:
+            data_collection_event.content = json.loads(data_collection_event.content)
+
+    output = models.MicaRootDataModel(
+        dataset=dataset,
+        study=study,
+        metadata={"url": f"{auth.url}/dataset/{dataset_id}"},
     )
 
-
-def load(json_data):
-    """
-    Loads a JSON object into a MicaDataset object (and related objects)
-    """
-    return {
-        "metadata": json_data["metadata"],
-        "dataset": MicaDataset(json_data["dataset"]),
-        "study": MicaStudy(json_data["study"]),
-        "variables": json_data["variables"],
-    }
+    click.echo(output.json(by_alias=True))

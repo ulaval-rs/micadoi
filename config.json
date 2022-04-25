@@ -1,0 +1,40 @@
+{
+    "mica": {
+        "prefix": "10.82134",
+        "suffix": "mavipan01",
+        "language": "French",
+        "version": "1.0.0",
+        "publisher": "Pulsar",
+        "resourceTypeGeneral": "Dataset",
+        "resourceType": "Investigation Data",
+        "subjects": [
+            {
+                "subject": "Social Determinants of Health",
+                "subjectScheme": "MESH",
+                "schemeURI": "http://id.nlm.nih.gov/mesh",
+                "valueURI": "http://id.nlm.nih.gov/mesh/D064890"
+            }
+        ],
+        "creators": [
+            {
+                "name": "",
+                "affiliation": ""
+            }
+        ],
+        "dates": [
+            {
+                "date": "",
+                "dateType": "Available"
+            },
+            {
+                "date": "",
+                "dateType": "Collected"
+            }
+        ],
+        "geoLocations": [
+            {
+                "geoLocationPlace": "Canada"
+            }
+        ]
+    }
+}
